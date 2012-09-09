@@ -1,1 +1,27 @@
-
+{
+  "name": "findabike",
+  "directories": {
+    "lib": "./lib",
+    "bin": "./bin"
+  },
+  "main": "./lib/index.js",
+  "bin": "./bin/findabike.js",
+  "version": "0.0.1",
+  "authors": ["Ben Coe <bencoe@gmail.com>", "Gabe Silk <gabesilk@gmail.com>", "Josh Hull <joshbuddy@gmail.com>"],
+  "engines": [
+    "node"
+  ],
+  "description": "Find a bike on Craig's List!",
+  "keywords": [
+    "bikes",
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gsilk/findabike.git"
+  },
+  "dependencies": {
+    "jdistiller": ">=1.0.0",
+    "micro-test": "1.0.0",
+    "request": ">=2.9.203"
+  }
+}
