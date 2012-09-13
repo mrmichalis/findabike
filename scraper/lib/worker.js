@@ -1,9 +1,11 @@
-var redis = require('redis');
+var client = require('beanstalk_client').Client,
+	$ = require('jquery');
 
-function Worker(opts, subscribeCallback) {
-	if (opts.crawl) this.crawl = opts.crawl;
-	this.subscribeCallback = subscribeCallback;
-	this.client = redis.createClient(null, null, {detect_buffers: true});
+function Worker(opts) {
+	$.extend(this, opts, {
+		beanstalkPort: '11300',
+		beanstalkHost: '127.0.0.1'
+	});
 	this._subscribeToEvents();
 }
 
@@ -11,24 +13,30 @@ Worker.WORK_QUEUE = 'crawls';
 
 Worker.prototype._subscribeToEvents = function() {
 	var _this = this;
-	
-	this.client.on('message', function(channel, message) {
-		_this.crawl(message);
+
+	client.connect(this.beanstalkHost + ':' + this.beanstalkPort, function(err, connection) {
+		
+		_this.connection = connection;
+		
+		_this.connection.reserve(function(err, id, jobJSON) {
+			var job = JSON.parse(jobJSON);
+			
+			if (job.email) _this.crawl(job.email);
+			
+			_this._rescheduleWork(id, job);
+		});
 	});
+};
+
+Worker.prototype._rescheduleWork = function(id, job) {
 	
-	this.client.on("subscribe", function (channel, count) {
-		_this.subscribeCallback();
+	this.connection.destroy(id, function(err) {
+		console.log('destroyed job ' + id)
 	});
-	
-	this.client.subscribe(Worker.WORK_QUEUE);
 };
 
 Worker.prototype.crawl = function(email) {
 	
-};
-
-Worker.prototype.shutdown = function() {
-	this.client.unsubscribe(Worker.WORK_QUEUE);
 };
 
 exports.Worker = Worker;
