@@ -1,0 +1,12 @@
+<html>
+<body>
+  <p><b><%=post['title']%></b></p>
+
+  <p><%=post['description']%> - <%=post['date']%></p>
+  <p><a href="<%=post['url']%>">go to craigslist...</a></p>
+
+  <p><% post['images'].each do |image| %>
+    <img src="<%=image%>" style="float:left">
+  <% end %></p>
+</body>
+</html>

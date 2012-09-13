@@ -108,9 +108,16 @@ module Findabike
     post "/sendmail/:key" do
       request.body.rewind
       body = request.body.read
+      puts "body:#{body}"
+      puts "params[:key] : #{params[:key]}"
+      puts "signed_body(body) : #{signed_body(body)}"
+
       if params[:key] == signed_body(body)
-        JSON.parse(body)
-        
+        parsed_body = JSON.parse(body)
+        mail_post(parsed_body['email'], parsed_body)
+        halt 200
+      else
+        halt 403
       end
     end
 
