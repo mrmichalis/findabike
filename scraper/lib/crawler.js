@@ -51,6 +51,7 @@ Crawler.prototype._crawl_post = function(url, callback) {
     .set('date', 'span.postingdate', function(elem, prev) {
       return elem.text().slice(6); // chop off the initial "Date  "
     })
+    .set('title', 'title')
     .set('images', '#userbody img', function(elem, prev) {
       return [elem.attr('src')];
     })
