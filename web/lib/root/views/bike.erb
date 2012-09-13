@@ -3,11 +3,11 @@
     $("#bike").submit(function() {
       var _this = this;
       $(_this).find("input[type=submit]").attr("disabled", "disabled");
-      $(_this).find("input[type=submit]").value("Saving...");
+      $(_this).find("input[type=submit]").attr('value', "Saving...");
       setTimeout(function() {
         $(_this).find("input[type=submit]").removeAttr("disabled");
-        $(_this).find("input[type=submit]").value("Uh-oh. Please try again.");
-      })
+        $(_this).find("input[type=submit]").value('value', "Uh-oh. Please try again.");
+      }, 5000);
       return true;
     });
   })
