@@ -29,6 +29,7 @@ Crawler.prototype._crawl_list = function(url, callback) {
         // TODO: make the jQery selector more selective
         // console.log('while scraping', elem.attr('href'), 'exception:', e);
       }
+      if (!id) return;
       return [{
         'url': elem.attr('href'),
         'title': elem.text(),
@@ -36,7 +37,7 @@ Crawler.prototype._crawl_list = function(url, callback) {
       }];
     })
     .distill(url, function(err, distilledPage) {
-      callback(distilledPage);
+      callback(err, distilledPage);
     });
 };
 
