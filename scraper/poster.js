@@ -35,16 +35,11 @@ Poster.prototype.init = function(callback) {
 	});
 }
 
-// enter loop
-var poster = new Poster();
-poster.init(function(err, conn) {
-
-  var cb = function(err, id, jobJSON) {
-
+function sendPost(str) {
     try {
 
       shasum = crypto.createHash('sha1');
-      shasum.update(jobJSON + AUTH_SECRET);
+      shasum.update(str + AUTH_SECRET);
 
       // POST the json
       var post_options = {
@@ -54,7 +49,7 @@ poster.init(function(err, conn) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': jobJSON.length
+          'Content-Length': str.length
         }
       };
 
@@ -71,12 +66,21 @@ poster.init(function(err, conn) {
       });
 
       // post the data
-      post_req.write(jobJSON);
+      post_req.write(str);
       post_req.end();
 
     } catch (e) {
       console.log(e);
     }
+}
+
+// enter loop
+var poster = new Poster();
+poster.init(function(err, conn) {
+
+  var cb = function(err, id, jobJSON) {
+
+    sendPost(jobJson);
 
     // destroy data
     conn.destroy(id, function(err) {
