@@ -231,15 +231,15 @@ esac
     end
     
     task :start_nginx, :roles => :web do
-      run "sudo /sbin/service nginx start"
+      run "sudo /etc/init.d/nginx start"
     end
 
     task :stop_nginx, :roles => :web do
-      run "sudo /sbin/service nginx stop"
+      run "sudo /etc/init.d/nginx stop"
     end
 
     task :restart_nginx, :roles => :web do
-      run "sudo /sbin/service nginx restart"
+      run "sudo /etc/init.d/nginx restart"
     end
 
     task :disable, :roles => :web do

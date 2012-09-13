@@ -9,7 +9,6 @@ require 'findabike/email'
 require 'findabike/craigslist'
 require 'findabike/auth'
 
-
 Mail.defaults do
   delivery_method :smtp, {
     :enable_starttls_auto => true,
@@ -109,8 +108,11 @@ module Findabike
       request.body.rewind
       body = request.body.read
       if params[:key] == signed_body(body)
-        JSON.parse(body)
-        
+        parsed_body = JSON.parse(body)
+        mail_post(parsed_body['email'], parsed_body)
+        halt 200
+      else
+        halt 403
       end
     end
 
