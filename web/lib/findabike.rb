@@ -55,7 +55,7 @@ module Findabike
           redirect "/"
         end
 
-        if url = @redis_client.hget(@email, "url")
+        if data = @redis_client.get(@email) and url = JSON.parse(data)['url']
           logger.info "using #{url} from redis"
 
           parsed_uri = URI(url)
@@ -84,8 +84,7 @@ module Findabike
           erb :sent_link
         else
           session[:email] = email
-          @redis_client.hsetnx email, "email", email
-          @redis_client.hsetnx email, "state", "inactive"
+          @redis_client.set email, {"email" => email, "state" => "inactive" }.to_json
           redirect "/bike"
         end
       else
@@ -106,8 +105,7 @@ module Findabike
     end
 
     post "/bike" do
-      @redis_client.hset(@email, "url", generate_craigslist_url(params[:area], params[:keywords]))
-      @redis_client.hset(@email, "state", "active")
+      @redis_client.set email, {"email" => email, "state" => "active", "url" => generate_craigslist_url(params[:area], params[:keywords]) }.to_json
       @redis_client.publish("new_users", @email)
       session[:notice] = "okay, its been saved"
       redirect '/bike'
