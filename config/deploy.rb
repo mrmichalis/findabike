@@ -1,8 +1,8 @@
 require "bundler/capistrano"
-require File.expand_path("../deploy/ec2-unicorn-recipe", __FILE__)
+require File.expand_path("../deploy/ec2_unicorn", __FILE__)
 
 set :application, "findabikefor.me"
-set :repository,  "https://github.com/gsilk/findabike.git"
+set :repository,  "git://github.com/gsilk/findabike.git"
 
 set :scm, :git
 set :deploy_to, "/var/www/#{application}"
@@ -21,9 +21,9 @@ ssh_options[:forward_agent] = true
 after "deploy:restart", "deploy:cleanup"
 
 task :fix_setup_permissions, :roles => [:web, :app] do
-  run "chown -R ec2-user /var/www/#{application}"
+  run "chown -R ubuntu /var/www/#{application}"
   run "mkdir -p /var/www/unicorn"
-  run "chown ec2-user /var/www/unicorn"
+  run "chown ubuntu /var/www/unicorn"
 end
 
 set :unicorn_pid do
