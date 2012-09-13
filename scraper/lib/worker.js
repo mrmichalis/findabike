@@ -46,7 +46,7 @@ Worker.prototype._subscribeToEvents = function() {
 Worker.prototype._rescheduleWork = function(id, job) {
 	var _this = this;
 	if (job.recurring) {
-		this.defaultConnection.put(1, 2, 120, JSON.stringify(job), function() {
+		this.defaultConnection.put(1, 180, 120, JSON.stringify(job), function() {
 			console.log('rescheduling ' + job.type + ' job id=' + id);
 			_this.defaultConnection.destroy(id, function(err) {
 				console.log('destroyed ' + job.type + ' job id=' + id)
