@@ -8,12 +8,16 @@ var redis = require("redis"),
 
 var data = {
   'gabesilk@gmail.com': {
+    'state': 'active',
     'url': 'http://sfbay.craigslist.org/search/bia?query=surly&srchType=A&minAsk=&maxAsk=',
-    'recent_posts': {}
+    'post_ids': [],
+    'last_work': 0
   },
   'bencoe@gmail.com': {
+    'state': 'active',
     'url': 'http://sfbay.craigslist.org/search/bia?query=bianchi&srchType=A&minAsk=&maxAsk=',
-    'recent_posts': {}
+    'post_ids': [],
+    'last_work': 0
   }
 };
 
@@ -27,3 +31,5 @@ client.on('error', function (err) {
 _.each(data, function(udata, email) {
   client.set(email, JSON.stringify(udata), redis.print);
 });
+
+client.quit();
