@@ -14,12 +14,6 @@ module Findabike
 
     def valid_sig?(email, time, sig)
       time_i = Integer(time)
-      puts "email: #{email}"
-      puts "time: #{time}"
-      puts "sig: #{sig}"
-      puts "time_i: #{time_i}"
-      puts "signed_time(email, time): #{signed_time(email, time)}"
-      puts "Time.new.to_i < time_i: #{Time.new.to_i < time_i}"
       Time.new.to_i < time_i and signed_time(email, time) == sig
     end
   end
