@@ -1,0 +1,26 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <script src="/js/jquery.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <title>findabike</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>findabike</h1>
+      <% if session[:email] %><p><a href="/logout">(logout)</a></p><% end %>
+      <% @errors.each do |error| %>
+        <div class="alert alert-error">
+          <%=error %>
+        </div>
+      <% end unless @errors.empty? %>
+      <% @notices.each do |notice| %>
+        <div class="alert">
+          <%=notice %>
+        </div>
+      <% end unless @notices.empty? %>
+      <%= yield %>
+    </div>
+  </body>
+</html>

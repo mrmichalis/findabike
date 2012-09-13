@@ -1,0 +1,23 @@
+<script>
+  $(document).ready(function() {
+    $("#bike").submit(function() {
+      var _this = this;
+      $(_this).find("input[type=submit]").attr("disabled", "disabled");
+      $(_this).find("input[type=submit]").value("Saving...");
+      setTimeout(function() {
+        $(_this).find("input[type=submit]").removeAttr("disabled");
+        $(_this).find("input[type=submit]").value("Uh-oh. Please try again.");
+      })
+      return true;
+    });
+  })
+</script>
+<form action="/bike" method="POST" id="bike">
+  <p><select name="area">
+    <% Findabike::Craigslist::AREAS.each do |key, name| %>
+      <option value="<%=key%>" <%= "selected" if key == @area %>><%=name%></option>
+    <% end %>
+  </select></p>
+  <p><input name="keywords" value="<%=@keywords%>" placeholder="keywords..."></p>
+  <p><input type="submit" value="save" class="btn btn-primary"></p>
+</form>
