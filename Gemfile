@@ -6,4 +6,4 @@ gem 'json'
 gem 'shotgun'
 gem 'mail'
 gem 'addressable'
-
+gem 'unicorn'

@@ -170,7 +170,7 @@ case $1 in
       echo "Unicorn pid file exists";
     else
       echo "Starting"
-      ruby -C #{current_path} -S bundle exec unicorn -D -E #{deploy_env} -c #{current_path}/config/unicorn.conf #{current_path}/config.ru;
+      ruby -C #{current_path} -S bundle exec unicorn -D -E production -c #{current_path}/config/unicorn.conf #{current_path}/config.ru;
     fi
     ;;  
   stop)

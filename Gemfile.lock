@@ -4,6 +4,7 @@ GEM
     addressable (2.3.2)
     i18n (0.6.1)
     json (1.7.5)
+    kgio (2.7.4)
     mail (2.4.4)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
@@ -13,6 +14,7 @@ GEM
     rack (1.4.1)
     rack-protection (1.2.0)
       rack
+    raindrops (0.10.0)
     redis (3.0.1)
     shotgun (0.9)
       rack (>= 1.0)
@@ -24,6 +26,10 @@ GEM
     treetop (1.4.10)
       polyglot
       polyglot (>= 0.3.1)
+    unicorn (4.3.1)
+      kgio (~> 2.6)
+      rack
+      raindrops (~> 0.7)
 
 PLATFORMS
   ruby
@@ -35,3 +41,4 @@ DEPENDENCIES
   redis
   shotgun
   sinatra
+  unicorn
