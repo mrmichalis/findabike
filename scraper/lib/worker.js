@@ -90,7 +90,7 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 			urls = [];
 			postIds = [];
 			for (var i = 0, listingLink; (listingLink = listing.things[i]) != null; i++) {
-				if (listingLink.id === postId) {
+				if (listingLink.id === postId || urls.length >= 10) {
 					terminate = true;
 					break;
 				} else if (listingLink.url) {
@@ -126,22 +126,17 @@ Worker.prototype._crawlUrls = function(email, urls, dataForUser, callback) {
 	var url = urls.pop(),
 		_this = this;
 	
-	if (url === '/bik/') {
-		_this._crawlUrls(email, urls, dataForUser, callback);
-	} else {
-		// Actulaly crawl the variable url
-		this.crawler._crawl_post(url, function(err, output) {
-			if (err) console.log(err)
-			output.email = email;
-			
-			_this.emailConnection.put(0, 0, 1, JSON.stringify(output), function() {
-				console.log(output)
-			});
-			
-			_this._crawlUrls(email, urls, dataForUser, callback);
-		});
-	}
+	// Actulaly crawl the variable url
+	this.crawler._crawl_post(url, function(err, output) {
+		if (err) console.log(err)
+		output.email = email;
 		
+		_this.emailConnection.put(0, 0, 1, JSON.stringify(output), function() {
+			console.log(output)
+		});
+		
+		_this._crawlUrls(email, urls, dataForUser, callback);
+	});
 };
 
 exports.Worker = Worker;
