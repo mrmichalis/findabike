@@ -1,5 +1,6 @@
 var client = require('beanstalk_client').Client,
-  redis = require("redis").createClient(),
+  redis = require('redis'),
+  redisCli = redis.createClient(),
   _ = require('underscore')._,
   $ = require('jquery');
 
@@ -16,7 +17,9 @@ function log() {
 // given an email and user data object, return a job descriptor
 function getJob(email, data) {
   return { email: email,
-           url: data.url };
+           url: data.url,
+           type: 'crawlPageJob'
+         };
 }
 
 function Sweeper(opts) {
@@ -61,19 +64,41 @@ Sweeper.prototype._clearBeanstalk = function() {
 }
 
 // schedule work for the given user email / data
-Sweeper.prototype._schedule = function(email, data, callback) {
+Sweeper.prototype._schedule = function(email, callback) {
   var _this = this;
 
-  // build the job description
-  var job = getJob(email, data);
+  // pull data from redis
+  redisCli.get(email, function(err, data) {
 
-  // log out the fact that we are scheduling a job
-  console.log('SCHEDULE', job);
+    // pass errors up
+    if (err) throw err;
 
-  // actually schedule client in beanstalk
-	this.connection.put(0, 0, 1, JSON.stringify(job), function(err, id) {
-    callback(err, id);
-	});
+    // check that data was set for user
+    if (! data) {
+      console.log('ERROR: redis has no data for user ' + email);
+      return;
+    }
+
+    // calculate time since last work
+    var obj = JSON.parse(data);
+    var last_work = obj['last_work'];
+    var curr_time = gettimeofday();
+    var tdiff = curr_time - last_work;
+
+    // if it exceeds 15 minutes, reschedule it
+    if (tdiff > 1000 * 60 * 15) {
+      // build the job description
+      var job = getJob(email, obj);
+      // log out the fact that we are scheduling a job
+      console.log('SCHEDULE', job);
+      // actually schedule client in beanstalk
+	    _this.connection.put(0, 0, 1, JSON.stringify(job), function(err, id) {
+        callback(err, id);
+	    });
+    }
+
+  });
+
 }
 
 // look for new users ("stale accounts"),
@@ -82,7 +107,7 @@ Sweeper.prototype._scanStaleAccounts = function() {
   var _this = this;
 
   // for each user (keyed by email)
-  redis.keys('*', function(err, emails) {
+  redisCli.keys('*', function(err, emails) {
 
     // <horrible>
     //
@@ -92,25 +117,8 @@ Sweeper.prototype._scanStaleAccounts = function() {
     var i = 0;
     var cb = function() {
       if (i >= emails.length) return;
-      var email = emails[i];
-
-      // pull data for the redis
-      redis.get(email, function(err, data) {
-
-        // calculate time since last work
-        var obj = JSON.parse(data);
-        var last_work = obj['last_work'];
-        var curr_time = gettimeofday();
-        var tdiff = curr_time - last_work;
-
-        // if it exceeds 15 minutes, reschedule it
-        if (tdiff > 1000 * 60 * 15) {
-          _this._schedule(email, obj, function(err, id) {
-            console.log('done scheduling');
-            i += 1;
-            cb();
-          });
-        }
+      _this._schedule(emails[i], function(err, id) {
+        console.log('done scheduling from stale account', id);
       });
     };
     cb();
@@ -126,9 +134,23 @@ sweeper.init(function(err, conn) {
   // clear the beanstalk on startup
   sweeper._clearBeanstalk();
 
+  // listen for new users
+  var redisPubCli = redis.createClient();
+  redisPubCli.on('subscribe', function (channel, count) {
+    console.log('subscribed to', channel);
+  });
+  redisPubCli.on('message', function (channel, message) {
+    var email = message;
+    console.log('got a new user', email, 'on the channel', channel);
+    sweeper._schedule(email, function(err, id) {
+      console.log('done scheduling new user in beanstalk');
+    });
+  });
+  redisPubCli.subscribe('new-users');
+
   // then periodically scan for stale accounts
   setInterval(function() {
     sweeper._scanStaleAccounts();
-  }, 1000);
+  }, 5000);
 
 });
