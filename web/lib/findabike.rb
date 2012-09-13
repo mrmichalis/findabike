@@ -105,6 +105,15 @@ module Findabike
       erb :bike
     end
 
+    post "/sendmail/:key" do
+      request.body.rewind
+      body = request.body.read
+      if params[:key] == signed_body(body)
+        JSON.parse(body)
+        
+      end
+    end
+
     post "/bike" do
       @redis_client.hset(@email, "url", generate_craigslist_url(params[:area], params[:keywords]))
       @redis_client.hset(@email, "state", "active")
