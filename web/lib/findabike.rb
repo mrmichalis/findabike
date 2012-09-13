@@ -104,6 +104,14 @@ module Findabike
       erb :bike
     end
 
+    post "/bike" do
+      @redis_client.hset(@email, "url", generate_craigslist_url(params[:area], params[:keywords]))
+      @redis_client.hset(@email, "state", "active")
+      @redis_client.publish("new_users", @email)
+      session[:notice] = "okay, its been saved"
+      redirect '/bike'
+    end
+
     post "/sendmail/:key" do
       request.body.rewind
       body = request.body.read
@@ -114,14 +122,6 @@ module Findabike
       else
         halt 403
       end
-    end
-
-    post "/bike" do
-      @redis_client.hset(@email, "url", generate_craigslist_url(params[:area], params[:keywords]))
-      @redis_client.hset(@email, "state", "active")
-      @redis_client.publish("new_users", @email)
-      session[:notice] = "okay, its been saved"
-      redirect '/bike'
     end
   end
 end
