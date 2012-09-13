@@ -23,6 +23,15 @@ module Findabike
       r
     end
 
+    def mail_authentication_link(email)
+      send_message(email, "come get yer bikes, yo", "confirmation")
+    end
+
+    def mail_post(email, post)
+      send_message(email, "here is a new post -- ", "post", binding)
+    end
+
+    private
     def host
       @host ||= case ENV['RACK_ENV']
       when 'development'
@@ -41,12 +50,7 @@ module Findabike
       "/bike?#{uri.query}"
     end
 
-    def mail_authentication_link(email)
-      send_message(email, "come get yer bikes, yo", "confirmation")
-    end
-
-    def send_message(email, subject, template_name)
-      b = binding
+    def send_message(email, subject, template_name, b = binding)
       Mail.deliver do
         from    'system@findmeabike.me'
         to      email
