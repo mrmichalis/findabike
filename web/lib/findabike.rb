@@ -47,6 +47,7 @@ module Findabike
           if valid_sig?(params[:email], params[:time], params[:key])
             logger.info "putting in the session #{params[:email]}"
             session[:email] = params[:email]
+            redirect "/bike"
           end
         end
 
