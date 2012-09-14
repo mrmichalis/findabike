@@ -105,7 +105,7 @@ module Findabike
     end
 
     post "/bike" do
-      @redis_client.set @email, {"email" => @email, "state" => "active", "url" => generate_craigslist_url(params[:area], params[:keywords]) }.to_json
+      @redis_client.set @email, {"email" => @email, "state" => "active", "url" => generate_craigslist_url(params[:area], params[:keywords]), "post_ids" => [], "last_work" => 0}.to_json
       @redis_client.publish("new-users", @email)
       session[:notice] = "okay, its been saved"
       redirect '/bike'
