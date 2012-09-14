@@ -12,7 +12,7 @@ require 'findabike/auth'
 Mail.defaults do
   delivery_method :smtp, {
     :enable_starttls_auto => true,
-    :address        => "smtp.gmail.com",
+    :address        => ENV['MAIL_HOST'],
     :port           => 587,
     :domain         => "findabikefor.me",
     :authentication => :plain,
