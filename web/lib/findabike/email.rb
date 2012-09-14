@@ -28,6 +28,7 @@ module Findabike
     end
 
     def mail_post(email, post)
+      logger.info "mail_post got #{post.inspect}"      
       send_message(email, "here is a new post -- ", "post", binding)
     end
 
