@@ -80,7 +80,7 @@ poster.init(function(err, conn) {
 
   var cb = function(err, id, jobJSON) {
 
-    sendPost(jobJson);
+    sendPost(jobJSON);
 
     // destroy data
     conn.destroy(id, function(err) {
