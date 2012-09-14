@@ -93,6 +93,8 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 			urls = [],
 			postIds = [];
 			
+		if (userInfo.state === 'inactive') return;
+			
 		if (!userInfo.post_ids.length) userInfo.post_ids = [-1];
 		
 		userInfo.post_ids.forEach(function(postId) {
