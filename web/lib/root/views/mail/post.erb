@@ -7,6 +7,6 @@
 
   <p><% post['images'].each do |image| %>
     <img src="<%=image%>" style="float:left">
-  <% end %></p>
+  <% end if post.key?('images') %></p>
 </body>
 </html>

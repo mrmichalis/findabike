@@ -43,8 +43,8 @@ function sendPost(str) {
 
       // POST the json
       var post_options = {
-        host: 'localhost',
-        port: '80',
+        host: process.env.WEB_HOST,
+        port: process.env.WEB_PORT,
         path: '/sendmail/' + shasum.digest('hex'),
         method: 'POST',
         headers: {
