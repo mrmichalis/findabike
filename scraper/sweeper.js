@@ -85,8 +85,9 @@ Sweeper.prototype._schedule = function(email, callback) {
     var curr_time = gettimeofday();
     var tdiff = curr_time - last_work;
 
-    // if it exceeds 15 minutes, reschedule it
-    if (tdiff > 1000 * 60 * 15) {
+    // if it exceeds 30 minutes, reschedule it -- the jobs reschedule themselves
+    // this would be caused by some sort of weird failure.
+    if (tdiff > 1000 * 60 * 30) {
       // build the job description
       var job = getJob(email, obj);
       // log out the fact that we are scheduling a job
