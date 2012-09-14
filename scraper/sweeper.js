@@ -94,7 +94,12 @@ Sweeper.prototype._schedule = function(email, callback) {
       console.log('SCHEDULE', job);
       // actually schedule client in beanstalk
 	    _this.connection.put(0, 0, 1, JSON.stringify(job), function(err, id) {
-        callback(err, id);
+        // update the timestamp to now in redis
+        console.log('updating timestamp for user', email);
+        obj.last_work = curr_time;
+        redisCli.set(email, JSON.stringify(obj), function() {
+          callback(err, id);
+        });
 	    });
     }
 
