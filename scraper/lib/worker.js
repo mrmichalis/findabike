@@ -19,17 +19,22 @@ function Worker(opts) {
 	
 	client.connect(this.beanstalkHost + ':' + this.beanstalkPort, function(err, emailConnection) {
 		_this.emailConnection = emailConnection;
-		_this.emailConnection.use('emails', function() {});
+		_this.emailConnection.use('emails', function() {
+			console.log('email connection initialized');
+		});
 	});
 
 }
 
-Worker.CHECK_POST_JOB = 'check_post_job';
-Worker.PARSE_LISTING_JOB = 'parse_listing_job';
+// get the current UNIX timestamp (millis since epoch)
+Worker.prototype.unixTime = function() {
+  return Math.round((new Date()).getTime() / 1000);
+}
 
 Worker.prototype._subscribeToEvents = function() {
 	var _this = this;
 
+	console.log('waiting for crawl message.');
 	_this.defaultConnection.reserve(function(err, id, jobJSON) {
 		var job = JSON.parse(jobJSON);
 		
@@ -46,7 +51,8 @@ Worker.prototype._subscribeToEvents = function() {
 Worker.prototype._rescheduleWork = function(id, job) {
 	var _this = this;
 	if (job.recurring) {
-		this.defaultConnection.put(1, 180, 120, JSON.stringify(job), function() {
+		// Look for work every 15 minutes.
+		this.defaultConnection.put(1, 900, 120, JSON.stringify(job), function() {
 			console.log('rescheduling ' + job.type + ' job id=' + id);
 			_this.defaultConnection.destroy(id, function(err) {
 				console.log('destroyed ' + job.type + ' job id=' + id)
@@ -61,7 +67,7 @@ Worker.prototype._rescheduleWork = function(id, job) {
 	}
 };
 
-Worker.prototype.checkFrontPage = function(job) {
+Worker.prototype.crawlPageJob = function(job) {
 	var _this = this;
 	this.crawler._crawl_list(job.url, function(err, listing) {
 		_this._getNewWork(job.email, listing, function(urls) {
@@ -79,16 +85,22 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 	var _this = this;
 	
 	redis.get(email, function(err, userInfoJSON) {
+		
+		console.log('starting to crawl user: ' + userInfoJSON);
+		
 		var userInfo = JSON.parse(userInfoJSON),
 			terminate = false,
 			urls = [],
 			postIds = [];
+			
+		if (!userInfo.post_ids.length) userInfo.post_ids = [-1];
 		
 		userInfo.post_ids.forEach(function(postId) {
 			if (terminate) return;
 			
 			urls = [];
 			postIds = [];
+			
 			for (var i = 0, listingLink; (listingLink = listing.things[i]) != null; i++) {
 				if (listingLink.id === postId || urls.length >= 10) {
 					terminate = true;
@@ -103,12 +115,13 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 			}
 		});
 		
-		_this._updateUserPostIdList(email, userInfo, postIds)
+		_this._updateUserInfo(email, userInfo, postIds)
 		if (urls.length) callback(urls);
 	});
 };
 
-Worker.prototype._updateUserPostIdList = function(email, userInfo, newPostIds) {
+Worker.prototype._updateUserInfo = function(email, userInfo, newPostIds) {
+	userInfo.last_work = this.unixTime();
 	userInfo.post_ids = newPostIds.concat(userInfo.post_ids);
 	if (userInfo.post_ids.length > 20) {
 		userInfo.post_ids.pop();
