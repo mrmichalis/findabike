@@ -22,6 +22,10 @@
   "dependencies": {
     "jdistiller": ">=0.0.2",
     "micro-test": "1.0.0",
-    "request": ">=2.9.203"
+    "request": ">=2.9.203",
+    "beanstalk_client": "*",
+    "redis": "*",
+    "underscore": "*",
+    "jquery": "*"
   }
 }

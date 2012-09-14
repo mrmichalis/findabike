@@ -1,2 +1,5 @@
 web: bundle exec unicorn -E development config.ru
-sweeper: cd scraper && node sweeper.js
+sweeper: node scraper/sweeper.js
+poster: node scraper/poster.js
+worker: node scraper/start-worker.js
+beanstalkd: beanstalkd
