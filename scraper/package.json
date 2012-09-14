@@ -13,14 +13,14 @@
   ],
   "description": "Find a bike on Craig's List!",
   "keywords": [
-    "bikes",
+    "bikes"
   ],
   "repository": {
     "type": "git",
     "url": "git://github.com/gsilk/findabike.git"
   },
   "dependencies": {
-    "jdistiller": ">=1.0.0",
+    "jdistiller": ">=0.0.2",
     "micro-test": "1.0.0",
     "request": ">=2.9.203"
   }
