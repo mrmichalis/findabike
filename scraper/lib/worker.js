@@ -27,7 +27,7 @@ function Worker(opts) {
 
 }
 
-Worker.CRAWL_FREQUENCY = 9;//00 Crawl every 15 minutes.
+Worker.CRAWL_FREQUENCY = 900;// Crawl every 15 minutes.
 Worker.MAX_POSTS_CACHED = 10;
 
 // get the current UNIX timestamp (millis since epoch)
