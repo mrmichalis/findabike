@@ -15,16 +15,20 @@ function Worker(opts) {
 	client.connect(this.beanstalkHost + ':' + this.beanstalkPort, function(err, defaultConnection) {
 		_this.defaultConnection = defaultConnection;
 		_this._subscribeToEvents();
+		console.log('reading work queue.');
 	});
 	
 	client.connect(this.beanstalkHost + ':' + this.beanstalkPort, function(err, emailConnection) {
 		_this.emailConnection = emailConnection;
 		_this.emailConnection.use('emails', function() {
-			console.log('email connection initialized');
+			console.log('reading email queue.');
 		});
 	});
 
 }
+
+Worker.CRAWL_FREQUENCY = 9;//00 Crawl every 15 minutes.
+Worker.MAX_POSTS_CACHED = 10;
 
 // get the current UNIX timestamp (millis since epoch)
 Worker.prototype.unixTime = function() {
@@ -34,11 +38,12 @@ Worker.prototype.unixTime = function() {
 Worker.prototype._subscribeToEvents = function() {
 	var _this = this;
 
-	console.log('waiting for crawl message.');
+	console.log('waiting for crawl.');
 	_this.defaultConnection.reserve(function(err, id, jobJSON) {
 		var job = JSON.parse(jobJSON);
 		
 		if (job.type) {
+			console.log('received crawl job.');
 			_this[job.type](job);
 		} else {
 			throw 'job type not found'
@@ -50,15 +55,13 @@ Worker.prototype._subscribeToEvents = function() {
 
 Worker.prototype._rescheduleWork = function(id, job) {
 	var _this = this;
-	if (job.recurring) {
-		// Look for work every 15 minutes.
-		this.defaultConnection.put(1, 900, 120, JSON.stringify(job), function() {
-			console.log('rescheduling ' + job.type + ' job id=' + id);
-			_this.defaultConnection.destroy(id, function(err) {
-				console.log('destroyed ' + job.type + ' job id=' + id)
-				_this._subscribeToEvents();
-			});
+	if (job.type) {
+		// 900 seconds, or every 15 minutes, we'll check for more bikes.
+		this.defaultConnection.release(id, 0, Worker.CRAWL_FREQUENCY, function() {
+			console.log('job id=' + id + ' released.');
+			_this._subscribeToEvents();
 		});
+		this.defaultConnection
 	} else {
 		this.defaultConnection.destroy(id, function(err) {
 			console.log('destroyed ' + job.type + ' job ' + id)
@@ -104,14 +107,11 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 			postIds = [];
 			
 			for (var i = 0, listingLink; (listingLink = listing.things[i]) != null; i++) {
-				if (listingLink.id === postId || urls.length >= 10) {
+				if (listingLink.id === postId || urls.length >= Worker.MAX_POSTS_CACHED) {
 					terminate = true;
 					break;
 				} else if (listingLink.url) {
 					urls.push(listingLink.url)
-				}
-				
-				if (listingLink.id) {
 					postIds.push(listingLink.id)
 				}
 			}
@@ -125,7 +125,7 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 Worker.prototype._updateUserInfo = function(email, userInfo, newPostIds) {
 	userInfo.last_work = this.unixTime();
 	userInfo.post_ids = newPostIds.concat(userInfo.post_ids);
-	if (userInfo.post_ids.length > 20) {
+	if (userInfo.post_ids.length > Worker.MAX_POSTS_CACHED) {
 		userInfo.post_ids.pop();
 	}
 	redis.set(email, JSON.stringify(userInfo))
@@ -143,7 +143,9 @@ Worker.prototype._crawlUrls = function(email, urls, dataForUser, callback) {
 	
 	// Actulaly crawl the variable url
 	this.crawler._crawl_post(url, function(err, output) {
+		
 		if (err) console.log(err)
+		
 		output.email = email;
 		
 		_this.emailConnection.put(0, 0, 1, JSON.stringify(output), function() {

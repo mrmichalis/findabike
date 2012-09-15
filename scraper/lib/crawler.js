@@ -1,9 +1,18 @@
 jDistiller = require('jdistiller').jDistiller,
-  _ = require('underscore')._;
+  _ = require('underscore')._,
+  fs = require('fs');
 
 function Crawler() {}
 
 Crawler.RESULTS_QUEUE = 'results';
+
+function fakeRequest(opts, callback) {
+	if (opts.url.indexOf('query') !== -1) {
+		return callback(null, {statusCode: 200}, fs.readFileSync('./fixtures/front-page.html').toString())
+	} else {
+		return callback(null, {statusCode: 200}, fs.readFileSync('./fixtures/page.html').toString())
+	}
+}
 
 // Crawls a search listing and returns a list of posts
 // of the form:
@@ -15,7 +24,9 @@ Crawler.RESULTS_QUEUE = 'results';
 Crawler.prototype._crawl_list = function(url, callback) {
   var _this = this;
 
-  new jDistiller()
+  new jDistiller(
+//    {request: fakeRequest}
+  )
     .set('title', 'title')
     .set('things', 'p.row a', function(elem, prev) {
       var regex = /\/(\d*)\.html/;
@@ -48,7 +59,9 @@ Crawler.prototype._crawl_list = function(url, callback) {
 Crawler.prototype._crawl_post = function(url, callback) {
   var _this = this;
 
-  new jDistiller()
+  new jDistiller(
+//    {request: fakeRequest}
+  )
     .set('date', 'span.postingdate', function(elem, prev) {
       return elem.text().slice(6); // chop off the initial "Date  "
     })
