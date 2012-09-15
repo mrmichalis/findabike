@@ -9,11 +9,6 @@ function gettimeofday() {
   return Math.round((new Date()).getTime() / 1000);
 }
 
-// print a JSON logline
-function log() {
-  console.log(JSON.stringify(arguments));
-}
-
 // given an email and user data object, return a job descriptor
 function getJob(email, data) {
   return { email: email,
@@ -32,11 +27,11 @@ function Sweeper(opts) {
 // initialize the Sweeper
 Sweeper.prototype.init = function(callback) {
 	var _this = this;
-  console.log('about to connect', this);
+  console.log('connecting...', this);
 	client.connect(this.beanstalkHost + ':' + this.beanstalkPort, function(err, connection) {
     if (err) throw err;
 		_this.connection = connection;
-    console.log('done connecting', _this);
+    console.log('connect success!');
     callback(err, connection);
 	});
 }
