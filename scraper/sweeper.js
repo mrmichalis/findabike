@@ -66,7 +66,10 @@ Sweeper.prototype._schedule = function(email, callback) {
   redisCli.get(email, function(err, data) {
 
     // pass errors up
-    if (err) throw err;
+    if (err) {
+		console.log(err);
+		return;
+	}
 
     // check that data was set for user
     if (! data) {
