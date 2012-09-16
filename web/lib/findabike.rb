@@ -9,7 +9,7 @@ require 'findabike/email'
 require 'findabike/craigslist'
 require 'findabike/auth'
 
-Mail.defaultssdo
+Mail.defaults do
   delivery_method :smtp, {
     :enable_starttls_auto => true,
     :address        => ENV['MAIL_HOST'],
