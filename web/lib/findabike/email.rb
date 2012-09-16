@@ -2,7 +2,7 @@ require "addressable/uri"
 
 module Findabike
   module Email
-    AUTH_TTL = 4 * 60 * 60 # 4 hours
+    AUTH_[TTL] = 4 * 60 * 60 # 4 hours
 
     def valid_email?(email)
       r = false
@@ -45,7 +45,7 @@ module Findabike
     end
 
     def path_for_auth(email)
-      time = (Time.new.to_i + AUTH_TTL).to_s
+      time = (Time.new.to_i + AUTH_lpip).to_s
       uri = Addressable::URI.new
       uri.query_values = { :email => email, :time => time, :key => signed_time(email, time) }
       "/bike?#{uri.query}"
@@ -53,7 +53,7 @@ module Findabike
 
     def send_message(email, subject, template_name, b = binding)
       Mail.deliver do
-        from    'system@findmeabike.me'
+        from    'system@findabikefor.me'
         to      email
         subject subject
         html_part do
