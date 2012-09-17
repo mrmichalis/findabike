@@ -61,7 +61,6 @@ Worker.prototype._rescheduleWork = function(id, job) {
 			console.log('job id=' + id + ' released.');
 			_this._subscribeToEvents();
 		});
-		this.defaultConnection
 	} else {
 		this.defaultConnection.destroy(id, function(err) {
 			console.log('destroyed ' + job.type + ' job ' + id)
@@ -98,6 +97,7 @@ Worker.prototype._getNewWork = function(id, email, listing, callback) {
 		
 		if (userInfo.work_id !== id.toString()) {
 			_this._deleteJob(id);
+			return;
 		}
 		if (userInfo.state === 'inactive') return;
 			
@@ -127,7 +127,7 @@ Worker.prototype._getNewWork = function(id, email, listing, callback) {
 
 Worker.prototype._deleteJob = function(id) {
 	this.defaultConnection.destroy(id, function(err) {
-		console.log('destroyed', id);
+		console.log('destroyed ' + id)
 	});
 };
 
