@@ -96,7 +96,7 @@ Worker.prototype._getNewWork = function(id, email, listing, callback) {
 			urls = [],
 			postIds = [];
 		
-		if (userInfo.job_id !== id) {
+		if (userInfo.work_id !== id.toString()) {
 			_this._deleteJob(id);
 		}
 		if (userInfo.state === 'inactive') return;
