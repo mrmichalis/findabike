@@ -44,7 +44,7 @@ Worker.prototype._subscribeToEvents = function() {
 		
 		if (job.type) {
 			console.log('received crawl job.');
-			_this[job.type](job);
+			_this[job.type](id, job);
 		} else {
 			throw 'job type not found'
 		}
@@ -70,10 +70,10 @@ Worker.prototype._rescheduleWork = function(id, job) {
 	}
 };
 
-Worker.prototype.crawlPageJob = function(job) {
+Worker.prototype.crawlPageJob = function(id, job) {
 	var _this = this;
 	this.crawler._crawl_list(job.url, function(err, listing) {
-		_this._getNewWork(job.email, listing, function(urls) {
+		_this._getNewWork(id, job.email, listing, function(urls) {
 			var dataForUser = {};
 			console.log('start to crawl urls')
 
@@ -84,7 +84,7 @@ Worker.prototype.crawlPageJob = function(job) {
 	})
 };
 
-Worker.prototype._getNewWork = function(email, listing, callback) {
+Worker.prototype._getNewWork = function(id, email, listing, callback) {
 	var _this = this;
 	
 	redis.get(email, function(err, userInfoJSON) {
@@ -95,7 +95,10 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 			terminate = false,
 			urls = [],
 			postIds = [];
-			
+		
+		if (userInfo.job_id !== id) {
+			_this._deleteJob(id);
+		}
 		if (userInfo.state === 'inactive') return;
 			
 		if (!userInfo.post_ids.length) userInfo.post_ids = [-1];
@@ -119,6 +122,12 @@ Worker.prototype._getNewWork = function(email, listing, callback) {
 		
 		_this._updateUserInfo(email, userInfo, postIds)
 		if (urls.length) callback(urls);
+	});
+};
+
+Worker.prototype._deleteJob = function(id) {
+	this.defaultConnection.destroy(id, function(err) {
+		console.log('destroyed', id);
 	});
 };
 

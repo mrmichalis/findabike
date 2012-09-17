@@ -95,6 +95,7 @@ Sweeper.prototype._schedule = function(email, callback) {
         // update the timestamp to now in redis
         console.log('updating timestamp for user', email);
         obj.last_work = curr_time;
+        obj.work_id = id.toString();
         redisCli.set(email, JSON.stringify(obj), function() {
           callback(err, id);
         });
