@@ -24,10 +24,9 @@ Poster.prototype.init = function(callback) {
     console.log('connection established');
 
     // register interest in 'email' queue and de-register in 'default'
-    _this.connection.ignore('default', function() {
+    _this.connection.watch('emails', function() {
       console.log('ignoring "default" queue');
-      _this.connection.watch('emails', function() {
-        console.log('watching "emails" queue');
+      _this.connection.ignore('default', function() {
         callback(err, connection);
       });
     });

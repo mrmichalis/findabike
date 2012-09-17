@@ -21,7 +21,7 @@ function Worker(opts) {
 	client.connect(this.beanstalkHost + ':' + this.beanstalkPort, function(err, emailConnection) {
 		_this.emailConnection = emailConnection;
 		_this.emailConnection.use('emails', function() {
-			console.log('reading email queue.');
+			console.log('using email queue.');
 		});
 	});
 
